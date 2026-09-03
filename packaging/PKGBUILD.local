@@ -1,6 +1,6 @@
 # Maintainer: William C. Canin
 pkgname=argvus-calendar
-pkgver=0.1.2
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="Calendar popup for Waybar, written in Rust for the Argvus desktop"
 arch=('x86_64')
