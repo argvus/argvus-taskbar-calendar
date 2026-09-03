@@ -1,0 +1,91 @@
+# Maintainer: William C. Canin
+pkgname=argvus-calendar
+pkgver=0.1.2
+pkgrel=1
+pkgdesc="Calendar popup for Waybar, written in Rust for the Argvus desktop"
+arch=('x86_64')
+url="https://github.com/argvus/argvus-calendar"
+license=('GPL-3.0-only')
+options=('!debug' '!lto')
+depends=(
+  'gtk4'
+  'gtk4-layer-shell'
+  'jq'
+  'xdg-utils'
+)
+makedepends=(
+  'cargo'
+  'pkgconf'
+)
+backup=(
+  'etc/argvus-calendar/config.toml'
+  'etc/argvus-calendar/style.css'
+  'etc/argvus-calendar/theme.css'
+  'etc/argvus-calendar/themes/argvus-dark-aether.css'
+  'etc/argvus-calendar/themes/argvus-dark-aether-float.css'
+  'etc/argvus-calendar/themes/argvus-dark-silver.css'
+  'etc/argvus-calendar/themes/argvus-dark-silver-float.css'
+  'etc/argvus-calendar/themes/argvus-dark-slate.css'
+  'etc/argvus-calendar/themes/argvus-dark-slate-float.css'
+  'etc/argvus-calendar/themes/argvus-dark-universe.css'
+  'etc/argvus-calendar/themes/argvus-dark-universe-float.css'
+  'etc/argvus-calendar/themes/argvus-light-veil.css'
+  'etc/argvus-calendar/themes/argvus-light-veil-float.css'
+)
+source=("${pkgname}-${pkgver}.tar.gz")
+sha256sums=("SKIP")
+
+prepare() {
+  cd "${pkgname}-${pkgver}"
+  cargo fetch --locked --target "${CARCH}-unknown-linux-gnu"
+}
+
+build() {
+  cd "${pkgname}-${pkgver}"
+
+  export CFLAGS="${CFLAGS/-flto=auto/}"
+  export CXXFLAGS="${CXXFLAGS/-flto=auto/}"
+  export FFLAGS="${FFLAGS/-flto=auto/}"
+  export FCFLAGS="${FCFLAGS/-flto=auto/}"
+  export LDFLAGS="${LDFLAGS/-flto=auto/}"
+
+  cargo build --release --locked --target-dir target
+}
+
+check() {
+  cd "${pkgname}-${pkgver}"
+
+  export CFLAGS="${CFLAGS/-flto=auto/}"
+  export CXXFLAGS="${CXXFLAGS/-flto=auto/}"
+  export FFLAGS="${FFLAGS/-flto=auto/}"
+  export FCFLAGS="${FCFLAGS/-flto=auto/}"
+  export LDFLAGS="${LDFLAGS/-flto=auto/}"
+
+  cargo test --locked --target-dir target
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+
+  install -Dm755 "target/release/${pkgname}" \
+    "${pkgdir}/usr/bin/${pkgname}"
+
+  install -Dm755 resources/argvus-calendar-waybar \
+    "${pkgdir}/usr/lib/${pkgname}/waybar-launcher"
+
+  install -Dm644 resources/config.toml \
+    "${pkgdir}/etc/${pkgname}/config.toml"
+  install -Dm644 resources/style.css \
+    "${pkgdir}/etc/${pkgname}/style.css"
+  install -Dm644 resources/theme.css \
+    "${pkgdir}/etc/${pkgname}/theme.css"
+
+  install -dm755 "${pkgdir}/etc/${pkgname}/themes"
+  install -m644 resources/themes/*.css "${pkgdir}/etc/${pkgname}/themes/"
+
+  install -Dm644 docs/systemd/argvus-calendar.service \
+    "${pkgdir}/usr/lib/systemd/user/${pkgname}.service"
+
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

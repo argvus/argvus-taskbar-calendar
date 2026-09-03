@@ -2,16 +2,19 @@ PREFIX ?= /usr
 BRANCH := $(shell git branch --show-current 2>/dev/null || echo "unknown")
 REMOTES := $(shell git remote 2>/dev/null || echo "")
 
-.PHONY: build check install uninstall reinstall service-enable service-disable service-restart clean push push-lease
+.PHONY: build build-bin check install uninstall reinstall service-enable service-disable service-restart clean push push-lease
 
 build:
+	@tools/build-local-package.sh
+
+build-bin:
 	cargo build --release --locked
 
 check:
 	cargo clippy
 	cargo test
 
-install: build
+install: build-bin
 	sudo tools/install.sh
 	systemctl --user daemon-reload
 	systemctl --user restart argvus-calendar
