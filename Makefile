@@ -35,6 +35,7 @@ service-restart:
 
 clean:
 	cargo clean
+	rm -rf dist
 	rm -f packaging/arch/*.zst packaging/arch/*.tar.gz
 
 # ----- GIT PUSH (development commands) -----
