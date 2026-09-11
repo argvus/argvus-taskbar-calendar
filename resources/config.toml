@@ -1,5 +1,5 @@
 # Argvus Calendar configuration
-# System-wide configuration lives in /etc/argvus-calendar/config.toml.
+# System-wide configuration lives in /etc/argvus/taskbar/calendar/config.toml.
 # It is edited through the gear button, which opens this file in a terminal
 # with sudo privileges.
 

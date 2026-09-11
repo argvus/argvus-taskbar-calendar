@@ -4,7 +4,7 @@ After=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=argvus-calendar service
+ExecStart=argvus-taskbar-calendar service
 Restart=on-failure
 
 [Install]

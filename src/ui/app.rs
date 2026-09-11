@@ -1656,18 +1656,18 @@ where
 fn control_reminder_service(enabled: bool) {
     if enabled {
         let _ = Command::new("systemctl")
-            .args(["--user", "reset-failed", "argvus-calendar.service"])
+            .args(["--user", "reset-failed", "argvus-taskbar-calendar.service"])
             .status();
     }
     let systemctl_args: &[&str] = if enabled {
-        &["--user", "enable", "--now", "argvus-calendar.service"]
+        &["--user", "enable", "--now", "argvus-taskbar-calendar.service"]
     } else {
-        &["--user", "disable", "--now", "argvus-calendar.service"]
+        &["--user", "disable", "--now", "argvus-taskbar-calendar.service"]
     };
     let _ = Command::new("systemctl").args(systemctl_args).status();
     if !enabled {
         let _ = Command::new("pkill")
-            .args(["-f", "argvus-calendar service"])
+            .args(["-f", "argvus-taskbar-calendar service"])
             .status();
     }
 }
@@ -1736,7 +1736,7 @@ pub fn run_ui(
     fixed_position: Option<(i32, i32)>,
 ) {
     let fixed_position = fixed_position.or_else(current_pointer_position);
-    let app = RelmApp::new("sh.argvus.Calendar").with_args(vec!["argvus-calendar".to_string()]);
+    let app = RelmApp::new("sh.argvus.Calendar").with_args(vec!["argvus-taskbar-calendar".to_string()]);
     app.allow_multiple_instances(true);
     let application = relm4::main_application();
     let _application_hold = application.hold();
@@ -1750,7 +1750,7 @@ pub fn run_ui(
 
 fn apply_layer_shell(window: &gtk::Window) {
     window.init_layer_shell();
-    window.set_namespace(Some("argvus-calendar"));
+    window.set_namespace(Some("argvus-taskbar-calendar"));
     window.set_layer(gtk4_layer_shell::Layer::Overlay);
     window.set_keyboard_mode(gtk4_layer_shell::KeyboardMode::Exclusive);
     window.set_exclusive_zone(0);

@@ -67,7 +67,7 @@ impl IpcMessage {
 }
 
 fn socket_path(paths: &Paths) -> PathBuf {
-    paths.cache_dir.join("argvus-calendar.sock")
+    paths.cache_dir.join("argvus-taskbar-calendar.sock")
 }
 
 /// Send a command to the running instance. Returns true when a running

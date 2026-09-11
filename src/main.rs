@@ -18,7 +18,7 @@ use error::Result;
 
 #[derive(Debug, Parser)]
 #[command(
-    name = "argvus-calendar",
+    name = "argvus-taskbar-calendar",
     version,
     about = "Native Argvus calendar popup for Wayland"
 )]
@@ -126,7 +126,7 @@ fn main() -> Result<()> {
                     position: None,
                 },
             ) {
-                eprintln!("argvus-calendar: no running instance to hide");
+                eprintln!("argvus-taskbar-calendar: no running instance to hide");
             }
         }
         Some(Command::Config) => config::open_config(&paths, &settings)?,
@@ -141,7 +141,7 @@ fn main() -> Result<()> {
                     position: None,
                 },
             ) {
-                eprintln!("argvus-calendar: no running instance to reload");
+                eprintln!("argvus-taskbar-calendar: no running instance to reload");
             }
         }
         Some(Command::Import { file }) => app::import_file(&paths, file)?,
@@ -162,8 +162,8 @@ mod tests {
     #[test]
     fn accepts_fixed_position_before_or_after_popup_command() {
         for args in [
-            ["argvus-calendar", "--x", "120", "--y", "28", "toggle"],
-            ["argvus-calendar", "show", "--x", "-120", "--y", "28"],
+            ["argvus-taskbar-calendar", "--x", "120", "--y", "28", "toggle"],
+            ["argvus-taskbar-calendar", "show", "--x", "-120", "--y", "28"],
         ] {
             let cli = Cli::try_parse_from(args).expect("valid fixed popup position");
             assert!(matches!(cli.command, Some(Command::Toggle | Command::Show)));
@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn rejects_incomplete_fixed_position() {
-        assert!(Cli::try_parse_from(["argvus-calendar", "toggle", "--x", "120"]).is_err());
-        assert!(Cli::try_parse_from(["argvus-calendar", "toggle", "--y", "28"]).is_err());
+        assert!(Cli::try_parse_from(["argvus-taskbar-calendar", "toggle", "--x", "120"]).is_err());
+        assert!(Cli::try_parse_from(["argvus-taskbar-calendar", "toggle", "--y", "28"]).is_err());
     }
 }

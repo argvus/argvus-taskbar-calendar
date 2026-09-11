@@ -26,7 +26,7 @@ impl ReminderScheduler {
     pub fn run(self) -> Result<()> {
         loop {
             if let Err(err) = self.tick() {
-                eprintln!("argvus-calendar: reminder scheduler tick failed: {err}");
+                eprintln!("argvus-taskbar-calendar: reminder scheduler tick failed: {err}");
                 warn!("reminder scheduler tick failed: {err}");
             }
             std::thread::sleep(self.poll_interval);
@@ -56,7 +56,7 @@ impl ReminderScheduler {
             }
         }
         if fired > 0 {
-            eprintln!("argvus-calendar: fired {fired} reminders");
+            eprintln!("argvus-taskbar-calendar: fired {fired} reminders");
             info!("fired {fired} reminders");
         } else {
             debug!("fired {fired} reminders");

@@ -295,17 +295,17 @@ pub fn write_active_theme(paths: &Paths, name: &str) -> Result<()> {
 }
 
 pub fn resolve_paths() -> Result<Paths> {
-    let config_dir = PathBuf::from("/etc/argvus-calendar");
-    let data_dir = ensure(xdg_home("XDG_DATA_HOME", ".local/share")?.join("argvus-calendar"))?;
-    let state_dir = ensure(xdg_home("XDG_STATE_HOME", ".local/state")?.join("argvus-calendar"))?;
-    let cache_dir = ensure(xdg_home("XDG_CACHE_HOME", ".cache")?.join("argvus-calendar"))?;
+    let config_dir = PathBuf::from("/etc/argvus/taskbar/calendar");
+    let data_dir = ensure(xdg_home("XDG_DATA_HOME", ".local/share")?.join("argvus-taskbar-calendar"))?;
+    let state_dir = ensure(xdg_home("XDG_STATE_HOME", ".local/state")?.join("argvus-taskbar-calendar"))?;
+    let cache_dir = ensure(xdg_home("XDG_CACHE_HOME", ".cache")?.join("argvus-taskbar-calendar"))?;
     let config_home = xdg_home("XDG_CONFIG_HOME", ".config")?;
     let argvus_config_dir = config_home.join("argvus");
     Ok(Paths {
         database: data_dir.join("calendar.db"),
         config_file: config_dir.join("config.toml"),
         legacy_settings_file: config_dir.join("settings.toml"),
-        user_config_file: config_home.join("argvus-calendar").join("config.toml"),
+        user_config_file: config_home.join("argvus-taskbar-calendar").join("config.toml"),
         user_style: config_dir.join("style.css"),
         theme_file: config_dir.join("theme.css"),
         theme_dir: config_dir.join("themes"),
@@ -600,7 +600,7 @@ show_events = false
         config.editor.args = vec!["-c".to_string(), "set nu".to_string()];
         config.terminal.command = "foot".to_string();
         let (program, args) =
-            editor_terminal_command(&config, Path::new("/etc/argvus-calendar/config.toml"))
+            editor_terminal_command(&config, Path::new("/etc/argvus/taskbar/calendar/config.toml"))
                 .unwrap();
         assert_eq!(program, "foot");
         assert_eq!(
@@ -611,7 +611,7 @@ show_events = false
                 "vim",
                 "-c",
                 "set nu",
-                "/etc/argvus-calendar/config.toml"
+                "/etc/argvus/taskbar/calendar/config.toml"
             ]
         );
     }

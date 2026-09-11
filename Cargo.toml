@@ -1,5 +1,5 @@
 [package]
-name = "argvus-calendar"
+name = "argvus-taskbar-calendar"
 version = "0.1.2"
 edition = "2024"
 description = "Calendar popup for Waybar, written in Rust for the Argvus desktop."

@@ -17,7 +17,7 @@ check:
 install: build-bin
 	sudo tools/install.sh
 	systemctl --user daemon-reload
-	systemctl --user restart argvus-calendar
+	systemctl --user restart argvus-taskbar-calendar
 
 uninstall:
 	sudo tools/uninstall.sh
@@ -25,13 +25,13 @@ uninstall:
 reinstall: uninstall install
 
 service-enable:
-	systemctl --user enable --now argvus-calendar
+	systemctl --user enable --now argvus-taskbar-calendar
 
 service-disable:
-	systemctl --user disable --now argvus-calendar
+	systemctl --user disable --now argvus-taskbar-calendar
 
 service-restart:
-	systemctl --user restart argvus-calendar
+	systemctl --user restart argvus-taskbar-calendar
 
 clean:
 	cargo clean

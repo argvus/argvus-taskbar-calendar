@@ -20,7 +20,7 @@ impl CalDavClient {
         password: impl Into<String>,
     ) -> Result<Self> {
         let http = reqwest::Client::builder()
-            .user_agent("argvus-calendar/0.1.0")
+            .user_agent("argvus-taskbar-calendar/0.1.0")
             .build()?;
         Ok(Self {
             base_url: base_url.into().trim_end_matches('/').to_string(),
