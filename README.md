@@ -4,7 +4,7 @@ Native ARGVUS calendar popup for Wayland/Hyprland.
 
 Version `0.1.0` provides a compact Relm4/GTK4 popup, layer-shell positioning for Waybar, SQLite storage, ICS import/export, configurable reminder scheduling with desktop notifications, and an internal CalDAV/WebDAV client foundation.
 
-Arch packaging is owned by this repository through `packaging/PKGBUILD`.
+Arch packaging is owned by this repository through `packaging/arch/{ci,local}/PKGBUILD`.
 
 ## Commands
 

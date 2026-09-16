@@ -4,7 +4,7 @@ Documentation of what each module and function does. The app is a native Wayland
 popup calendar (GTK4 + Relm4 + `gtk4-layer-shell`) that opens exactly where the
 user clicks in Waybar, stores events in SQLite and schedules desktop reminders.
 
-## Entry point — `src/main.rs`
+## Entry point — `crates/main/src/main.rs`
 
 Parses the CLI with `clap` and dispatches each command.
 

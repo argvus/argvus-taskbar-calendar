@@ -1,0 +1,26 @@
+{
+  "recommendations": [
+    "rust-lang.rust-analyzer",
+    "vadimcn.vscode-lldb",
+    "tamasfe.even-better-toml",
+    "fill-labs.dependi",
+    "llvm-vs-code-extensions.lldb-dap",
+    "ms-vscode.makefile-tools",
+    "chadalen.vscode-jetbrains-icon-theme",
+    "esbenp.prettier-vscode",
+    "wayou.vscode-todo-highlight",
+    "ms-python.python",
+    "ms-vscode.cmake-tools",
+    "aaron-bond.better-comments",
+    "editorconfig.editorconfig",
+    "ardonplay.vscode-jetbrains-icon-theme",
+    "miguelsolorio.symbols", // Symbols Icons
+    "seunlanlege.action-buttons",
+    "shortall.html-liquid-preview",
+    "redhat.vscode-yaml", // Front Matter YAML
+    "yzhang.markdown-all-in-one", // Markdown with shortcuts and preview
+    "davidanson.vscode-markdownlint",
+    "gruntfuggly.todo-tree",
+    "zainchen.json",
+  ]
+}

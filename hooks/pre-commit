@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+# To use, run the following command only once in the project directory:
+#   git config core.hooksPath hooks
+
+echo "Running checks..."
+
+# ----- Checks -----
+if ! make check; then
+  echo "Checks failed. Commit aborted."
+  exit 1
+fi
+
+echo "OK"
+exit 0

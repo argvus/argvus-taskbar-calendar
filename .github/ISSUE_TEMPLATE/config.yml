@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+
+# Replace <ORG>/<REPO> when creating a project from this template.
+contact_links:
+  - name: ARGVUS Discussion
+    url: https://github.com/orgs/argvus/discussions
+    about: Ask questions and discuss ideas.
+  - name: Report a security vulnerability
+    url: https://github.com/<ORG>/<REPO>/security/policy
+    about: Report vulnerabilities privately, do not open a public issue.
