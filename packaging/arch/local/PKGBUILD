@@ -35,6 +35,10 @@ backup=(
 source=("${pkgname}-${pkgver}.tar.gz")
 sha256sums=("SKIP")
 
+_cargo_target_dir() {
+  printf '%s' "${CARGO_TARGET_DIR:-$srcdir/${pkgname}-${pkgver}/target}"
+}
+
 prepare() {
   cd "${pkgname}-${pkgver}"
   cargo fetch --locked --target "${CARCH}-unknown-linux-gnu"
@@ -49,7 +53,7 @@ build() {
   export FCFLAGS="${FCFLAGS/-flto=auto/}"
   export LDFLAGS="${LDFLAGS/-flto=auto/}"
 
-  cargo build --workspace --release --locked --target-dir target
+  cargo build --workspace --release --locked
 }
 
 check() {
@@ -61,7 +65,7 @@ check() {
   export FCFLAGS="${FCFLAGS/-flto=auto/}"
   export LDFLAGS="${LDFLAGS/-flto=auto/}"
 
-  cargo test --workspace --locked --target-dir target
+  cargo test --workspace --locked
 }
 
 package() {
@@ -69,7 +73,7 @@ package() {
 
   ETCDIR="etc/argvus/taskbar/calendar"
 
-  install -Dm755 "target/release/${pkgname}" \
+  install -Dm755 "$(_cargo_target_dir)/release/${pkgname}" \
     "${pkgdir}/usr/bin/${pkgname}"
 
   install -Dm755 resources/argvus-taskbar-calendar-waybar \
