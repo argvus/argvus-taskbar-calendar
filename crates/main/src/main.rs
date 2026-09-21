@@ -15,6 +15,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use error::Result;
+use ipc::PopupAnchor;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -42,6 +43,14 @@ struct Cli {
     requires = "x"
   )]
   y: Option<i32>,
+
+  /// Bottom edge of the Waybar surface in desktop coordinates.
+  #[arg(long, global = true, value_name = "PX", allow_hyphen_values = true)]
+  bar_bottom: Option<i32>,
+
+  /// Right edge of the Waybar surface in desktop coordinates.
+  #[arg(long, global = true, value_name = "PX", allow_hyphen_values = true)]
+  bar_right: Option<i32>,
 
   #[command(subcommand)]
   command: Option<Command>,
@@ -77,7 +86,25 @@ fn main() -> Result<()> {
   // The Waybar launcher supplies an immutable click position. Direct CLI
   // calls retain the live-pointer fallback for backwards compatibility.
   let click_position = opens_popup
-    .then(|| cli.x.zip(cli.y).or_else(ui::app::current_pointer_position))
+    .then(|| {
+      cli
+        .x
+        .zip(cli.y)
+        .map(|(x, y)| PopupAnchor {
+          x,
+          y,
+          bar_bottom: cli.bar_bottom,
+          bar_right: cli.bar_right,
+        })
+        .or_else(|| {
+          ui::app::current_pointer_position().map(|(x, y)| PopupAnchor {
+            x,
+            y,
+            bar_bottom: cli.bar_bottom,
+            bar_right: cli.bar_right,
+          })
+        })
+    })
     .flatten();
   let paths = config::resolve_paths()?;
   let settings = match config::Settings::load(&paths) {
@@ -180,7 +207,13 @@ mod tests {
     ] {
       let cli = Cli::try_parse_from(args).expect("valid fixed popup position");
       assert!(matches!(cli.command, Some(Command::Toggle | Command::Show)));
-      assert_eq!(cli.x.zip(cli.y).map(|(x, y)| (x.abs(), y)), Some((120, 28)));
+      assert_eq!(
+        cli
+          .x
+          .zip(cli.y)
+          .map(|(x, y)| (x.abs(), y, cli.bar_bottom, cli.bar_right)),
+        Some((120, 28, None, None))
+      );
     }
   }
 

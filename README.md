@@ -26,7 +26,7 @@ argvus-taskbar-calendar service
 Waybar:
 
 ```json
-"on-click": "/usr/lib/argvus-taskbar-calendar/waybar-launcher --surface {x_root} {y_root}"
+"on-click": "/usr/lib/argvus-taskbar-calendar/waybar-launcher --root {x} {y}"
 ```
 
 ## Paths
@@ -36,6 +36,10 @@ Waybar:
 - Data/database: `$XDG_DATA_HOME/argvus-taskbar-calendar/` or `~/.local/share/argvus-taskbar-calendar/`
 - State: `$XDG_STATE_HOME/argvus-taskbar-calendar/` or `~/.local/state/argvus-taskbar-calendar/`
 - Cache: `$XDG_CACHE_HOME/argvus-taskbar-calendar/` or `~/.cache/argvus-taskbar-calendar/`
+
+The active ARGVUS highlight color is read from
+`$XDG_CONFIG_HOME/argvus/.accent-color` (or `~/.config/argvus/.accent-color`)
+and is applied at runtime without replacing the selected theme.
 
 ## Configuration
 

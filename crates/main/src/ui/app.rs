@@ -17,7 +17,7 @@ use crate::config::{
   write_active_theme,
 };
 use crate::i18n::{I18n, Language, Text};
-use crate::ipc::IpcCommand;
+use crate::ipc::{IpcCommand, PopupAnchor};
 use crate::storage::Database;
 
 use super::agenda::rebuild_agenda;
@@ -32,8 +32,7 @@ use super::settings::{
 
 const POPUP_WIDTH: i32 = 398;
 const POPUP_HEIGHT_ESTIMATE: i32 = 520;
-const POPUP_GAP_Y: i32 = 12;
-const SCREEN_MARGIN: i32 = 4;
+const POPUP_GAP_Y: i32 = 4;
 
 type PopupBounds = (i32, i32, i32, i32);
 
@@ -50,6 +49,8 @@ struct ThemeFingerprint {
   cache_len: u64,
   active_mtime: i64,
   active_len: u64,
+  accent_mtime: i64,
+  accent_len: u64,
 }
 
 fn file_fingerprint(path: &Path) -> (i64, u64) {
@@ -67,11 +68,19 @@ fn file_fingerprint(path: &Path) -> (i64, u64) {
 fn theme_fingerprint(paths: &Paths) -> ThemeFingerprint {
   let (cache_mtime, cache_len) = file_fingerprint(&paths.cache_theme_file);
   let (active_mtime, active_len) = file_fingerprint(&paths.active_argvus_theme_file);
+  let accent_file = paths
+    .active_argvus_theme_file
+    .parent()
+    .map(|parent| parent.join(".accent-color"))
+    .unwrap_or_default();
+  let (accent_mtime, accent_len) = file_fingerprint(&accent_file);
   ThemeFingerprint {
     cache_mtime,
     cache_len,
     active_mtime,
     active_len,
+    accent_mtime,
+    accent_len,
   }
 }
 
@@ -82,7 +91,7 @@ pub struct AppInit {
   pub command: PopupCommand,
   /// Pointer position captured by the Waybar launcher before application
   /// startup, so later pointer movement cannot relocate the popup.
-  pub fixed_position: Option<(i32, i32)>,
+  pub fixed_position: Option<PopupAnchor>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -137,8 +146,8 @@ pub enum AppMsg {
   SettingsTerminalCommand(String),
   SettingsTerminalArgs(String),
   ReloadConfig,
-  Toggle(Option<(i32, i32)>),
-  Show(Option<(i32, i32)>),
+  Toggle(Option<PopupAnchor>),
+  Show(Option<PopupAnchor>),
   Hide,
   ClickOutside,
   ReloadTheme,
@@ -161,7 +170,7 @@ pub struct AppModel {
   events: Vec<CalendarEvent>,
   event_days: HashSet<NaiveDate>,
   events_enabled: bool,
-  fixed_position: Option<(i32, i32)>,
+  fixed_position: Option<PopupAnchor>,
   view: ViewState,
   i18n: I18n,
   popup_state: Rc<PopupState>,
@@ -1675,7 +1684,7 @@ fn present_popup(
   window: &gtk::Window,
   popup: &gtk::Box,
   popup_state: &Rc<PopupState>,
-  fixed_position: Option<(i32, i32)>,
+  fixed_position: Option<PopupAnchor>,
 ) {
   let presentation_id = popup_state.presentation_id.get().wrapping_add(1);
   popup_state.presentation_id.set(presentation_id);
@@ -1688,6 +1697,28 @@ fn present_popup(
   popup.queue_resize();
   window.queue_resize();
   window.present();
+  let measured_state = popup_state.clone();
+  window.add_tick_callback(move |window, _| {
+    if !window.is_visible() || measured_state.presentation_id.get() != presentation_id {
+      return gtk::glib::ControlFlow::Break;
+    }
+    let width = window.width();
+    let height = window.height();
+    if width > 0
+      && height > 0
+      && let Some((x, y, old_width, old_height)) = measured_state.bounds.get()
+    {
+      let y = if window.is_anchor(gtk4_layer_shell::Edge::Bottom) {
+        y + old_height - height
+      } else {
+        y
+      };
+      measured_state
+        .bounds
+        .set(Some((x + old_width - width, y, width, height)));
+    }
+    gtk::glib::ControlFlow::Continue
+  });
   window.grab_focus();
   window.queue_draw();
   let click_outside = window.clone();
@@ -1701,10 +1732,18 @@ fn present_popup(
   });
 }
 
-fn set_monitor_at_pointer(window: &gtk::Window, fixed_position: Option<(i32, i32)>) {
-  let Some((pointer_x, pointer_y)) = fixed_position.or_else(current_pointer_position) else {
+fn set_monitor_at_pointer(window: &gtk::Window, fixed_position: Option<PopupAnchor>) {
+  let Some(anchor) = fixed_position.or_else(|| {
+    current_pointer_position().map(|(x, y)| PopupAnchor {
+      x,
+      y,
+      bar_bottom: None,
+      bar_right: None,
+    })
+  }) else {
     return;
   };
+  let (pointer_x, pointer_y) = (anchor.x, anchor.y);
   let Some(display) = gtk::gdk::Display::default() else {
     return;
   };
@@ -1732,9 +1771,16 @@ pub fn run_ui(
   paths: Paths,
   settings: Settings,
   command: PopupCommand,
-  fixed_position: Option<(i32, i32)>,
+  fixed_position: Option<PopupAnchor>,
 ) {
-  let fixed_position = fixed_position.or_else(current_pointer_position);
+  let fixed_position = fixed_position.or_else(|| {
+    current_pointer_position().map(|(x, y)| PopupAnchor {
+      x,
+      y,
+      bar_bottom: None,
+      bar_right: None,
+    })
+  });
   let app =
     RelmApp::new("sh.argvus.Calendar").with_args(vec!["argvus-taskbar-calendar".to_string()]);
   app.allow_multiple_instances(true);
@@ -1753,7 +1799,9 @@ fn apply_layer_shell(window: &gtk::Window) {
   window.set_namespace(Some("argvus-taskbar-calendar"));
   window.set_layer(gtk4_layer_shell::Layer::Overlay);
   window.set_keyboard_mode(gtk4_layer_shell::KeyboardMode::Exclusive);
-  window.set_exclusive_zone(0);
+  // Margins below are relative to the full monitor. With zone 0 the
+  // compositor adds the panels' reserved area again, pushing us down.
+  window.set_exclusive_zone(-1);
   for edge in [
     gtk4_layer_shell::Edge::Top,
     gtk4_layer_shell::Edge::Right,
@@ -1767,9 +1815,11 @@ fn apply_layer_shell(window: &gtk::Window) {
   window.set_anchor(gtk4_layer_shell::Edge::Right, true);
 }
 
-fn position_popup(window: &gtk::Window, fixed_position: Option<(i32, i32)>) -> PopupBounds {
+fn position_popup(window: &gtk::Window, fixed_position: Option<PopupAnchor>) -> PopupBounds {
   let position = popup_position(fixed_position);
-  window.set_margin(gtk4_layer_shell::Edge::Bottom, 0);
+  window.set_anchor(gtk4_layer_shell::Edge::Top, !position.above);
+  window.set_anchor(gtk4_layer_shell::Edge::Bottom, position.above);
+  window.set_margin(gtk4_layer_shell::Edge::Bottom, position.margin_bottom);
   window.set_margin(gtk4_layer_shell::Edge::Left, 0);
   window.set_margin(gtk4_layer_shell::Edge::Top, position.margin_top);
   window.set_margin(gtk4_layer_shell::Edge::Right, position.margin_right);
@@ -1777,24 +1827,60 @@ fn position_popup(window: &gtk::Window, fixed_position: Option<(i32, i32)>) -> P
 }
 
 struct PopupPosition {
+  above: bool,
+  margin_bottom: i32,
   margin_top: i32,
   margin_right: i32,
   bounds: PopupBounds,
 }
 
-fn popup_position(fixed_position: Option<(i32, i32)>) -> PopupPosition {
-  let (pointer_x, pointer_y) =
-    fixed_position.unwrap_or_else(|| current_pointer_position().unwrap_or((0, 0)));
+fn popup_position(fixed_position: Option<PopupAnchor>) -> PopupPosition {
+  let anchor = fixed_position.unwrap_or_else(|| {
+    current_pointer_position()
+      .map(|(x, y)| PopupAnchor {
+        x,
+        y,
+        bar_bottom: None,
+        bar_right: None,
+      })
+      .unwrap_or(PopupAnchor {
+        x: 0,
+        y: 0,
+        bar_bottom: None,
+        bar_right: None,
+      })
+  });
+  let (pointer_x, pointer_y) = (anchor.x, anchor.y);
   let monitor = current_monitor_geometry(pointer_x, pointer_y).unwrap_or((0, 0, 1920, 1080, 0));
   let (origin_x, origin_y, width, height, reserved_top) = monitor;
-  let (popup_x, popup_y) = popup_origin(pointer_x, pointer_y, origin_x, origin_y, width, height);
+  let waybar = current_waybar_geometry(pointer_x, pointer_y, monitor);
+  let bar_bottom = waybar
+    .map(|geometry| geometry.bottom)
+    .or(anchor.bar_bottom)
+    .unwrap_or(origin_y + reserved_top);
+  let bar_right = waybar
+    .map(|geometry| geometry.right)
+    .or(anchor.bar_right)
+    .unwrap_or(origin_x + width);
+  let (popup_x, popup_y) = popup_origin(bar_right, bar_bottom, origin_x, origin_y, width, height);
+  let above = waybar.is_some_and(|bar| bar.top - origin_y > height / 2);
+  let margin_bottom = waybar
+    .filter(|_| above)
+    .map_or(0, |bar| (origin_y + height - bar.top + POPUP_GAP_Y).max(0));
 
   PopupPosition {
-    margin_top: (popup_y - reserved_top).max(0),
-    margin_right: (width - popup_x - POPUP_WIDTH).max(SCREEN_MARGIN),
+    above,
+    margin_bottom,
+    margin_top: if above { 0 } else { popup_y.max(0) },
+    margin_right: (width - popup_x - POPUP_WIDTH).max(0),
     bounds: (
       origin_x + popup_x,
-      origin_y + popup_y.max(reserved_top),
+      origin_y
+        + if above {
+          height - margin_bottom - POPUP_HEIGHT_ESTIMATE
+        } else {
+          popup_y
+        },
       POPUP_WIDTH,
       POPUP_HEIGHT_ESTIMATE,
     ),
@@ -1802,20 +1888,78 @@ fn popup_position(fixed_position: Option<(i32, i32)>) -> PopupPosition {
 }
 
 fn popup_origin(
-  pointer_x: i32,
-  pointer_y: i32,
+  bar_right: i32,
+  bar_bottom: i32,
   origin_x: i32,
   origin_y: i32,
   width: i32,
   height: i32,
 ) -> (i32, i32) {
-  let local_x = pointer_x - origin_x;
-  let local_y = pointer_y - origin_y;
-  let max_x = (width - POPUP_WIDTH - SCREEN_MARGIN).max(SCREEN_MARGIN);
-  let max_y = (height - POPUP_HEIGHT_ESTIMATE - SCREEN_MARGIN).max(SCREEN_MARGIN);
-  let popup_x = local_x.clamp(SCREEN_MARGIN, max_x);
-  let popup_y = (local_y + POPUP_GAP_Y).clamp(SCREEN_MARGIN, max_y);
+  let max_x = (width - POPUP_WIDTH).max(0);
+  let max_y = (height - POPUP_HEIGHT_ESTIMATE).max(0);
+  let popup_x = (bar_right - origin_x - POPUP_WIDTH).clamp(0, max_x);
+  let popup_y = (bar_bottom - origin_y + POPUP_GAP_Y).clamp(0, max_y);
   (popup_x, popup_y)
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct WaybarGeometry {
+  top: i32,
+  right: i32,
+  bottom: i32,
+}
+
+fn current_waybar_geometry(
+  pointer_x: i32,
+  pointer_y: i32,
+  monitor: (i32, i32, i32, i32, i32),
+) -> Option<WaybarGeometry> {
+  let output = Command::new("hyprctl")
+    .args(["layers", "-j"])
+    .output()
+    .ok()?;
+  if !output.status.success() {
+    return None;
+  }
+  let outputs = serde_json::from_slice::<serde_json::Value>(&output.stdout).ok()?;
+  select_waybar(&outputs, pointer_x, pointer_y, monitor)
+}
+
+fn select_waybar(
+  outputs: &serde_json::Value,
+  pointer_x: i32,
+  pointer_y: i32,
+  monitor: (i32, i32, i32, i32, i32),
+) -> Option<WaybarGeometry> {
+  let (mx, my, mw, mh, _) = monitor;
+  outputs
+    .as_object()?
+    .values()
+    .filter_map(|output| output.get("levels")?.as_object())
+    .flat_map(|levels| levels.values())
+    .filter_map(serde_json::Value::as_array)
+    .flatten()
+    .filter_map(|layer| {
+      let namespace = layer.get("namespace")?.as_str()?;
+      let x = layer.get("x")?.as_i64()? as i32;
+      let y = layer.get("y")?.as_i64()? as i32;
+      let w = layer.get("w")?.as_i64()? as i32;
+      let h = layer.get("h")?.as_i64()? as i32;
+      let horizontal = namespace == "waybar" && w > h.saturating_mul(4);
+      let same_monitor = x >= mx && x < mx + mw && y >= my && y < my + mh;
+      let distance = i64::from(pointer_x.clamp(x, x + w) - pointer_x).abs()
+        + i64::from(pointer_y.clamp(y, y + h) - pointer_y).abs();
+      (horizontal && same_monitor).then_some((
+        distance,
+        WaybarGeometry {
+          top: y,
+          right: x.checked_add(w)?,
+          bottom: y.checked_add(h)?,
+        },
+      ))
+    })
+    .min_by_key(|(distance, _)| *distance)
+    .map(|(_, bar)| bar)
 }
 
 fn pointer_is_outside_popup(bounds: Option<PopupBounds>) -> bool {
@@ -1906,7 +2050,49 @@ fn runtime_css(_config_path: &std::path::Path, paths: &Paths) -> String {
   let size = settings.appearance.font_size.clamp(8, 32);
   format!(
     ".argvus-calendar, .event-editor {{ font-family: \"{family}\", monospace; font-size: {size}px; }}\n\
-         window.argvus-calendar-window, .argvus-calendar-window {{ background-color: transparent; background-image: none; box-shadow: none; }}"
+         window.argvus-calendar-window, .argvus-calendar-window {{ background-color: transparent; background-image: none; box-shadow: none; }}\n{}",
+    accent_runtime_css(paths)
+  )
+}
+
+fn accent_runtime_css(paths: &Paths) -> String {
+  let accent_file = paths
+    .active_argvus_theme_file
+    .parent()
+    .map(|parent| parent.join(".accent-color"));
+  let Some(accent_file) = accent_file else {
+    return String::new();
+  };
+  let Ok(value) = std::fs::read_to_string(accent_file) else {
+    return String::new();
+  };
+  let value = value.trim();
+  let hex = value.strip_prefix('#').unwrap_or(value);
+  if hex.len() != 6 || !hex.chars().all(|ch| ch.is_ascii_hexdigit()) {
+    return String::new();
+  }
+  let Ok(red) = u8::from_str_radix(&hex[0..2], 16) else {
+    return String::new();
+  };
+  let Ok(green) = u8::from_str_radix(&hex[2..4], 16) else {
+    return String::new();
+  };
+  let Ok(blue) = u8::from_str_radix(&hex[4..6], 16) else {
+    return String::new();
+  };
+  let luminance = (299 * u32::from(red) + 587 * u32::from(green) + 114 * u32::from(blue)) / 1000;
+  let text = if luminance >= 128 {
+    "#000000"
+  } else {
+    "#FFFFFF"
+  };
+  format!(
+    ".today-button, .add-event, .weekday, .day-current, .editor-label, .editor-save, .events-toggle:checked {{ color: {value}; }}\n\
+     .nav-button:hover, .add-event:hover, .day:hover, .event-button:hover, .editor-action:hover, .agenda row:hover, .event-row:hover {{ background-color: rgba({red}, {green}, {blue}, 0.16); border-color: {value}; }}\n\
+     .nav-button:focus, .add-event:focus, .day:focus, .event-button:focus, .editor-action:focus, .editor-entry:focus, .event-editor entry:focus, .day-selected {{ border-color: {value}; }}\n\
+     .day-current.day-selected {{ background-color: rgba({red}, {green}, {blue}, 0.22); }}\n\
+     .event-divider {{ color: rgba({red}, {green}, {blue}, 0.54); }}\n\
+     .day-selected, .editor-save {{ color: {text}; }}"
   )
 }
 
@@ -1989,7 +2175,43 @@ mod tests {
 
   #[test]
   fn popup_opens_below_the_fixed_click_position() {
-    assert_eq!(popup_origin(900, 30, 0, 0, 1920, 1080), (900, 42));
-    assert_eq!(popup_origin(2000, 1200, 0, 0, 1920, 1080), (1518, 556));
+    assert_eq!(popup_origin(1902, 46, 0, 0, 1920, 1080), (1504, 50));
+    assert_eq!(popup_origin(1920, 1060, 0, 0, 1920, 1080), (1522, 560));
+  }
+
+  #[test]
+  fn popup_right_edge_follows_waybar_not_click_position() {
+    let layers = serde_json::json!({"HDMI-A-1": {"levels": {"1": [
+      {"namespace":"waybar", "x":18, "y":18, "w":1884, "h":28},
+      {"namespace":"waybar", "x":18, "y":64, "w":384, "h":998}
+    ]}}});
+    for y in [0, 7, 17, 18, 30, 45, 46] {
+      let bar = select_waybar(&layers, 1600, y, (0, 0, 1920, 1080, 64)).unwrap();
+      assert_eq!(
+        bar,
+        WaybarGeometry {
+          top: 18,
+          right: 1902,
+          bottom: 46
+        }
+      );
+      assert_eq!(
+        popup_origin(bar.right, bar.bottom, 0, 0, 1920, 1080),
+        (1504, 50)
+      );
+    }
+  }
+
+  #[test]
+  fn bottom_bar_is_found_even_with_surface_local_click_coordinates() {
+    let layers = serde_json::json!({"HDMI-A-1": {"levels": {"1": [
+      {"namespace":"waybar", "x":0, "y":1050, "w":1920, "h":28},
+      {"namespace":"waybar", "x":0, "y":0, "w":384, "h":1050}
+    ]}}});
+    for y in [7, 1050, 1077] {
+      let bar = select_waybar(&layers, 1600, y, (0, 0, 1920, 1080, 0)).unwrap();
+      assert_eq!(bar.top, 1050);
+      assert_eq!(bar.right, 1920);
+    }
   }
 }

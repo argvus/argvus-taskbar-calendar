@@ -38,11 +38,19 @@ impl IpcCommand {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PopupAnchor {
+  pub x: i32,
+  pub y: i32,
+  pub bar_bottom: Option<i32>,
+  pub bar_right: Option<i32>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IpcMessage {
   pub command: IpcCommand,
   /// Pointer position captured by the Waybar launcher, so the running UI can
-  /// pin the popup to the click point instead of re-reading the live cursor.
-  pub position: Option<(i32, i32)>,
+  /// select the correct monitor without re-reading the live cursor.
+  pub position: Option<PopupAnchor>,
 }
 
 impl IpcMessage {
@@ -53,17 +61,44 @@ impl IpcMessage {
     if let (Some(x), Some(y)) = (parts.next(), parts.next())
       && let (Ok(x), Ok(y)) = (x.parse(), y.parse())
     {
-      position = Some((x, y));
+      let bar_bottom = parts.next().and_then(parse_optional_coordinate);
+      let bar_right = parts.next().and_then(parse_optional_coordinate);
+      position = Some(PopupAnchor {
+        x,
+        y,
+        bar_bottom,
+        bar_right,
+      });
     }
     Some(Self { command, position })
   }
 
   fn as_str(&self) -> String {
     match self.position {
-      Some((x, y)) => format!("{} {x} {y}", self.command.as_str()),
+      Some(anchor) => {
+        let mut message = format!("{} {} {}", self.command.as_str(), anchor.x, anchor.y);
+        if anchor.bar_bottom.is_some() || anchor.bar_right.is_some() {
+          message.push_str(&format!(
+            " {} {}",
+            anchor
+              .bar_bottom
+              .map_or_else(|| "-".to_string(), |value| value.to_string()),
+            anchor
+              .bar_right
+              .map_or_else(|| "-".to_string(), |value| value.to_string())
+          ));
+        }
+        message
+      }
       None => self.command.as_str().to_string(),
     }
   }
+}
+
+fn parse_optional_coordinate(value: &str) -> Option<i32> {
+  (value != "-" && value != "none")
+    .then(|| value.parse().ok())
+    .flatten()
 }
 
 fn socket_path(paths: &Paths) -> PathBuf {
@@ -134,7 +169,12 @@ mod tests {
     ] {
       let message = IpcMessage {
         command,
-        position: Some((123, 456)),
+        position: Some(PopupAnchor {
+          x: 123,
+          y: 456,
+          bar_bottom: Some(64),
+          bar_right: Some(1902),
+        }),
       };
       assert_eq!(IpcMessage::parse(&message.as_str()), Some(message));
     }
@@ -157,7 +197,24 @@ mod tests {
       IpcMessage::parse("toggle 12 34"),
       Some(IpcMessage {
         command: IpcCommand::Toggle,
-        position: Some((12, 34)),
+        position: Some(PopupAnchor {
+          x: 12,
+          y: 34,
+          bar_bottom: None,
+          bar_right: None,
+        }),
+      })
+    );
+    assert_eq!(
+      IpcMessage::parse("toggle 12 34 - 1902"),
+      Some(IpcMessage {
+        command: IpcCommand::Toggle,
+        position: Some(PopupAnchor {
+          x: 12,
+          y: 34,
+          bar_bottom: None,
+          bar_right: Some(1902),
+        }),
       })
     );
     assert_eq!(IpcMessage::parse("garbage"), None);
