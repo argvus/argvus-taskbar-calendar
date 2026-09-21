@@ -1,5 +1,6 @@
 @define-color argvus_bg #f7f7f7;
 @define-color argvus_bg_alpha rgba(247, 247, 247, 0.99);
+@define-color argvus_bg_effective @argvus_bg_alpha;
 @define-color argvus_surface #ebebeb;
 @define-color argvus_fg #181818;
 @define-color argvus_muted #454545;
@@ -10,7 +11,7 @@
 @define-color argvus_focus rgba(24, 24, 24, 0.75);
 
 .argvus-calendar {
-  background: @argvus_bg_alpha;
+  background: @argvus_bg_effective;
   color: @argvus_fg;
   border-color: @argvus_border;
   border-radius: 0;
