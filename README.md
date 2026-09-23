@@ -97,4 +97,4 @@ The gear button opens the same config file. The popup reloads the config on each
 - Provider-specific account setup, such as Google Calendar and assisted Nextcloud setup, is planned for `0.2`.
 - The `auto` language follows the operating system locale: Portuguese when the system is set to `pt-*`, English otherwise. An explicit `en-US` or `pt-BR` in the settings always wins.
 - Styling is external: `/etc/argvus/taskbar/calendar/style.css` provides structure, `/etc/argvus/taskbar/calendar/theme.css` provides the packaged default, `/etc/argvus/taskbar/calendar/themes/` contains ARGVUS themes, and `$XDG_CACHE_HOME/argvus-taskbar-calendar/theme.css` is the user-level active theme written by the ARGVUS theme switcher.
-- Supported ARGVUS themes: Dark Aether, Dark Aether Float, Dark Silver, Dark Silver Float, Dark Slate, Dark Slate Float, Dark Universe, Dark Universe Float, Light Veil and Light Veil Float.
+- Supported ARGVUS themes: Dark Aether, Dark Aether Float, Dark Silver, Dark Silver Float, Dark Slate, Dark Slate Float, Dark Universe, Dark Universe Float, Light Veil, Light Veil Float, ARGVUS Frost and ARGVUS Frost Float.
