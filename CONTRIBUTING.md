@@ -96,7 +96,8 @@ Creating a release requires the following GitHub secrets:
 | Secret | Purpose |
 | --- | --- |
 | `GPG_PRIVATE_KEY` | private key used to sign packages and the repo database |
-| `GPG_PASSPHRASE` | passphrase of the GPG key (empty if none) |
+| `GPG_KEY_ID` | expected key ID/fingerprint for the signing key |
+| `GPG_PASSPHRASE` | non-empty passphrase of the GPG signing key |
 | `PACKAGES_REPO_TOKEN` | PAT with `contents:write` on `argvus/packages` |
 
 Only maintainers manage these. See

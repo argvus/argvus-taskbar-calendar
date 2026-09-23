@@ -114,11 +114,11 @@ In **Settings → Secrets and variables → Actions** of the repository:
 | Secret | Value |
 | --- | --- |
 | `GPG_PRIVATE_KEY` | output of `gpg --armor --export-secret-keys KEY_ID` (full PEM block) |
-| `GPG_PASSPHRASE` | passphrase of the key (if it has one) |
+| `GPG_KEY_ID` | expected key ID/fingerprint for the signing key |
+| `GPG_PASSPHRASE` | non-empty passphrase of the GPG signing key |
 | `PACKAGES_REPO_TOKEN` | PAT with `contents:write` scope on the `argvus/packages` repo |
 
-If the key has no passphrase, leave `GPG_PASSPHRASE` empty (the workflow
-signs without it).
+`GPG_PASSPHRASE` must be non-empty; the release workflow rejects an empty passphrase.
 
 ## Publish a release
 
