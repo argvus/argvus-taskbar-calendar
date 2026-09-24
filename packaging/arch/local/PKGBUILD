@@ -31,6 +31,8 @@ backup=(
   'etc/argvus/taskbar/calendar/themes/argvus-dark-gruvbox-high-float.css'
   'etc/argvus/taskbar/calendar/themes/argvus-dark-hackerman.css'
   'etc/argvus/taskbar/calendar/themes/argvus-dark-hackerman-float.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-dark-monokai.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-dark-monokai-float.css'
   'etc/argvus/taskbar/calendar/themes/argvus-dark-rosepine.css'
   'etc/argvus/taskbar/calendar/themes/argvus-dark-rosepine-float.css'
   'etc/argvus/taskbar/calendar/themes/argvus-dark-silver.css'
