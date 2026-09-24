@@ -31,9 +31,13 @@ backup=(
   'etc/argvus/taskbar/calendar/themes/argvus-dark-universe-float.css'
   'etc/argvus/taskbar/calendar/themes/argvus-light-veil.css'
   'etc/argvus/taskbar/calendar/themes/argvus-light-veil-float.css'
-  'etc/argvus/taskbar/calendar/themes/argvus-frost.css'
-  'etc/argvus/taskbar/calendar/themes/argvus-frost-float.css'
-  'etc/argvus/taskbar/calendar/themes/argvus-tokyo-night.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-light-frost.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-light-frost-float.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-light-solarized.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-light-solarized-float.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-dark-tokio-night.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-dark-solitude.css'
+  'etc/argvus/taskbar/calendar/themes/argvus-dark-solitude-float.css'
 )
 source=(
   "${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz"

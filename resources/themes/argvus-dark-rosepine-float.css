@@ -1,4 +1,4 @@
-@import url("argvus-catppuccin-latte.css");
+@import url("argvus-dark-rosepine.css");
 
 .argvus-calendar {
   border-radius: 4px;
@@ -14,4 +14,3 @@
 .event-editor entry {
   border-radius: 4px;
 }
-
