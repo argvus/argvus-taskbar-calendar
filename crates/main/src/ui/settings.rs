@@ -347,7 +347,7 @@ mod tests {
     config.terminal.command = "foot".to_string();
     config.terminal.args = vec!["-f".to_string()];
 
-    let draft = SettingsDraft::from_config(&config, "argvus-dark-slate", true);
+    let draft = SettingsDraft::from_config(&config, "slate-dark", true);
     let restored = draft.into_config();
 
     assert_eq!(restored.appearance.font_family, "Noto Sans");

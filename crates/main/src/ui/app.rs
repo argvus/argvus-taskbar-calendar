@@ -2245,17 +2245,13 @@ mod tests {
     let root = std::env::temp_dir().join(format!("argvus-calendar-theme-{}", uuid::Uuid::new_v4()));
     let theme_dir = root.join("themes");
     std::fs::create_dir_all(&theme_dir).unwrap();
-    let paths = test_theme_paths(&root, "argvus-dark-gruvbox-float");
+    let paths = test_theme_paths(&root, "gruvbox-dark-float");
     std::fs::create_dir_all(paths.active_argvus_theme_file.parent().unwrap()).unwrap();
     std::fs::create_dir_all(paths.cache_theme_file.parent().unwrap()).unwrap();
-    std::fs::write(
-      &paths.active_argvus_theme_file,
-      "argvus-dark-gruvbox-float\n",
-    )
-    .unwrap();
+    std::fs::write(&paths.active_argvus_theme_file, "gruvbox-dark-float\n").unwrap();
     std::fs::write(
       &paths.cache_theme_file,
-      "/* argvus-theme: argvus-dark-gruvbox-float */\n",
+      "/* argvus-theme: gruvbox-dark-float */\n",
     )
     .unwrap();
 
@@ -2267,13 +2263,13 @@ mod tests {
   #[test]
   fn stale_calendar_theme_cache_is_ignored() {
     let root = std::env::temp_dir().join(format!("argvus-calendar-theme-{}", uuid::Uuid::new_v4()));
-    let paths = test_theme_paths(&root, "argvus-dark-sunset");
+    let paths = test_theme_paths(&root, "sunset");
     std::fs::create_dir_all(paths.active_argvus_theme_file.parent().unwrap()).unwrap();
-    std::fs::write(&paths.active_argvus_theme_file, "argvus-dark-sunset\n").unwrap();
+    std::fs::write(&paths.active_argvus_theme_file, "sunset\n").unwrap();
     std::fs::create_dir_all(paths.cache_theme_file.parent().unwrap()).unwrap();
     std::fs::write(
       &paths.cache_theme_file,
-      "/* argvus-theme: argvus-dark-gruvbox */\n",
+      "/* argvus-theme: gruvbox-dark */\n",
     )
     .unwrap();
 
@@ -2285,16 +2281,12 @@ mod tests {
   #[test]
   fn current_cache_is_loaded_before_new_theme_asset_is_installed() {
     let root = std::env::temp_dir().join(format!("argvus-calendar-theme-{}", uuid::Uuid::new_v4()));
-    let paths = test_theme_paths(&root, "argvus-dark-sunset");
-    std::fs::remove_file(paths.theme_dir.join("argvus-dark-sunset.css")).unwrap();
+    let paths = test_theme_paths(&root, "sunset");
+    std::fs::remove_file(paths.theme_dir.join("sunset.css")).unwrap();
     std::fs::create_dir_all(paths.active_argvus_theme_file.parent().unwrap()).unwrap();
-    std::fs::write(&paths.active_argvus_theme_file, "argvus-dark-sunset\n").unwrap();
+    std::fs::write(&paths.active_argvus_theme_file, "sunset\n").unwrap();
     std::fs::create_dir_all(paths.cache_theme_file.parent().unwrap()).unwrap();
-    std::fs::write(
-      &paths.cache_theme_file,
-      "/* argvus-theme: argvus-dark-sunset */\n",
-    )
-    .unwrap();
+    std::fs::write(&paths.cache_theme_file, "/* argvus-theme: sunset */\n").unwrap();
 
     let stylesheets = stylesheet_paths(&paths);
     assert!(stylesheets.contains(&paths.cache_theme_file));
