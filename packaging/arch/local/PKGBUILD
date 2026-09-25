@@ -56,6 +56,8 @@ backup=(
   'etc/argvus/taskbar/calendar/themes/frost-float.css'
   'etc/argvus/taskbar/calendar/themes/solarized-light.css'
   'etc/argvus/taskbar/calendar/themes/solarized-light-float.css'
+  'etc/argvus/taskbar/calendar/themes/one-light.css'
+  'etc/argvus/taskbar/calendar/themes/one-light-float.css'
   'etc/argvus/taskbar/calendar/themes/one-dark.css'
   'etc/argvus/taskbar/calendar/themes/one-dark-float.css'
 )
