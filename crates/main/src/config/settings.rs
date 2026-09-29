@@ -602,13 +602,13 @@ show_events = false
     let mut config = AppConfig::default();
     config.editor.command = "vim".to_string();
     config.editor.args = vec!["-c".to_string(), "set nu".to_string()];
-    config.terminal.command = "foot".to_string();
+    config.terminal.command = "kitty".to_string();
     let (program, args) = editor_terminal_command(
       &config,
       Path::new("/etc/argvus/taskbar/calendar/config.toml"),
     )
     .unwrap();
-    assert_eq!(program, "foot");
+    assert_eq!(program, "kitty");
     assert_eq!(
       args,
       [
