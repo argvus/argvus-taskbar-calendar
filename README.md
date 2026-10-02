@@ -38,7 +38,7 @@ Waybar:
 - Cache: `$XDG_CACHE_HOME/argvus-taskbar-calendar/` or `~/.cache/argvus-taskbar-calendar/`
 
 The active ARGVUS highlight color is read from
-`$XDG_CONFIG_HOME/argvus/.accent-color` (or `~/.config/argvus/.accent-color`)
+`$XDG_CONFIG_HOME/argvus/data/.accent-color` (or `~/.config/argvus/data/.accent-color`)
 and is applied at runtime without replacing the selected theme.
 
 ## Configuration

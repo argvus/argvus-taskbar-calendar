@@ -344,7 +344,7 @@ mod tests {
     config.calendar.sync_interval_minutes = 5;
     config.editor.command = "kitty".to_string();
     config.editor.args = vec!["-e".to_string(), "nvim".to_string()];
-    config.terminal.command = "foot".to_string();
+    config.terminal.command = "kitty".to_string();
     config.terminal.args = vec!["-f".to_string()];
 
     let draft = SettingsDraft::from_config(&config, "slate-dark", true);
@@ -360,7 +360,7 @@ mod tests {
     assert_eq!(restored.calendar.sync_interval_minutes, 5);
     assert_eq!(restored.editor.command, "kitty");
     assert_eq!(restored.editor.args, vec!["-e", "nvim"]);
-    assert_eq!(restored.terminal.command, "foot");
+    assert_eq!(restored.terminal.command, "kitty");
     assert_eq!(restored.terminal.args, vec!["-f"]);
   }
 

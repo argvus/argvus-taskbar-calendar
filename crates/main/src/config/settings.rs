@@ -314,7 +314,7 @@ pub fn resolve_paths() -> Result<Paths> {
     theme_file: config_dir.join("theme.css"),
     theme_dir: config_dir.join("themes"),
     cache_theme_file: cache_dir.join("theme.css"),
-    active_argvus_theme_file: argvus_config_dir.join(".active-theme"),
+    active_argvus_theme_file: argvus_config_dir.join("data/.active-theme"),
     events_enabled_file: cache_dir.join("events-enabled"),
     config_dir,
     data_dir,
@@ -433,7 +433,7 @@ mod tests {
       theme_file: root.join("config/theme.css"),
       theme_dir: root.join("config/themes"),
       cache_theme_file: root.join("cache/theme.css"),
-      active_argvus_theme_file: root.join("config/argvus/.active-theme"),
+      active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
       events_enabled_file: root.join("cache/events-enabled"),
     };
     let config = AppConfig::load(&paths).unwrap();
@@ -459,7 +459,7 @@ mod tests {
       theme_file: root.join("config/theme.css"),
       theme_dir: root.join("config/themes"),
       cache_theme_file: root.join("cache/theme.css"),
-      active_argvus_theme_file: root.join("config/argvus/.active-theme"),
+      active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
       events_enabled_file: root.join("cache/events-enabled"),
     };
     std::fs::write(
@@ -497,7 +497,7 @@ show_events = false
       theme_file: root.join("config/theme.css"),
       theme_dir: root.join("config/themes"),
       cache_theme_file: root.join("cache/theme.css"),
-      active_argvus_theme_file: root.join("config/argvus/.active-theme"),
+      active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
       events_enabled_file: root.join("cache/events-enabled"),
     };
     std::fs::write(&paths.config_file, "[appearance").unwrap();
@@ -519,7 +519,7 @@ show_events = false
       theme_file: root.join("config/theme.css"),
       theme_dir: root.join("config/themes"),
       cache_theme_file: root.join("cache/theme.css"),
-      active_argvus_theme_file: root.join("config/argvus/.active-theme"),
+      active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
       events_enabled_file: root.join("cache/events-enabled"),
     }
   }
@@ -602,13 +602,13 @@ show_events = false
     let mut config = AppConfig::default();
     config.editor.command = "vim".to_string();
     config.editor.args = vec!["-c".to_string(), "set nu".to_string()];
-    config.terminal.command = "foot".to_string();
+    config.terminal.command = "kitty".to_string();
     let (program, args) = editor_terminal_command(
       &config,
       Path::new("/etc/argvus/taskbar/calendar/config.toml"),
     )
     .unwrap();
-    assert_eq!(program, "foot");
+    assert_eq!(program, "kitty");
     assert_eq!(
       args,
       [
