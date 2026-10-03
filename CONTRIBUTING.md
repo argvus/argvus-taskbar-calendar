@@ -127,4 +127,4 @@ tagging.
 ## License
 
 Contributions are accepted under the terms of the
-[GPL-3.0 License](LICENSE) that covers this project.
+[GPL-3.0-only](LICENSE) that covers this project.
