@@ -33,6 +33,9 @@ use super::settings::{
 const POPUP_WIDTH: i32 = 398;
 const POPUP_HEIGHT_ESTIMATE: i32 = 520;
 const POPUP_GAP_Y: i32 = 4;
+// Layer namespaces that identify the horizontal bar. ARGVUS taskbar runs Waybar
+// with the `argvus-taskbar` namespace; plain Waybar uses `waybar`.
+const WAYBAR_LAYER_NAMESPACES: [&str; 2] = ["argvus-taskbar", "waybar"];
 
 type PopupBounds = (i32, i32, i32, i32);
 
@@ -1945,7 +1948,7 @@ fn select_waybar(
       let y = layer.get("y")?.as_i64()? as i32;
       let w = layer.get("w")?.as_i64()? as i32;
       let h = layer.get("h")?.as_i64()? as i32;
-      let horizontal = namespace == "waybar" && w > h.saturating_mul(4);
+      let horizontal = WAYBAR_LAYER_NAMESPACES.contains(&namespace) && w > h.saturating_mul(4);
       let same_monitor = x >= mx && x < mx + mw && y >= my && y < my + mh;
       let distance = i64::from(pointer_x.clamp(x, x + w) - pointer_x).abs()
         + i64::from(pointer_y.clamp(y, y + h) - pointer_y).abs();
@@ -2225,6 +2228,35 @@ mod tests {
         (1504, 50)
       );
     }
+  }
+
+  #[test]
+  fn argvus_taskbar_layer_is_recognized_at_top_and_bottom() {
+    let top = serde_json::json!({"HDMI-A-1": {"levels": {"1": [
+      {"namespace":"argvus-taskbar", "x":18, "y":18, "w":1884, "h":28},
+      {"namespace":"argvus-widget-telemetry", "x":18, "y":64, "w":384, "h":998}
+    ]}}});
+    let bar = select_waybar(&top, 1600, 30, (0, 0, 1920, 1080, 64)).unwrap();
+    assert_eq!(
+      bar,
+      WaybarGeometry {
+        top: 18,
+        right: 1902,
+        bottom: 46
+      }
+    );
+    assert_eq!(
+      popup_origin(bar.right, bar.bottom, 0, 0, 1920, 1080),
+      (1504, 50)
+    );
+
+    let bottom = serde_json::json!({"HDMI-A-1": {"levels": {"1": [
+      {"namespace":"argvus-taskbar", "x":18, "y":1034, "w":1884, "h":28}
+    ]}}});
+    let bar = select_waybar(&bottom, 1600, 1040, (0, 0, 1920, 1080, 0)).unwrap();
+    assert_eq!(bar.top, 1034);
+    assert_eq!(bar.right, 1902);
+    assert_eq!(bar.bottom, 1062);
   }
 
   #[test]
