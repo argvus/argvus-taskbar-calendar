@@ -298,8 +298,12 @@ pub fn resolve_paths() -> Result<Paths> {
   let config_dir = PathBuf::from("/etc/argvus/taskbar/calendar");
   let data_dir =
     ensure(xdg_home("XDG_DATA_HOME", ".local/share")?.join("argvus-taskbar-calendar"))?;
-  let state_dir =
-    ensure(xdg_home("XDG_STATE_HOME", ".local/state")?.join("argvus-taskbar-calendar"))?;
+  let state_dir = ensure(
+    xdg_home("XDG_STATE_HOME", ".local/state")?
+      .join("argvus")
+      .join("taskbar")
+      .join("calendar"),
+  )?;
   let cache_dir = ensure(xdg_home("XDG_CACHE_HOME", ".cache")?.join("argvus-taskbar-calendar"))?;
   let config_home = xdg_home("XDG_CONFIG_HOME", ".config")?;
   let argvus_config_dir = config_home.join("argvus");
@@ -315,7 +319,7 @@ pub fn resolve_paths() -> Result<Paths> {
     theme_dir: config_dir.join("themes"),
     cache_theme_file: cache_dir.join("theme.css"),
     active_argvus_theme_file: argvus_config_dir.join("data/.active-theme"),
-    events_enabled_file: cache_dir.join("events-enabled"),
+    events_enabled_file: state_dir.join("events-enabled"),
     config_dir,
     data_dir,
     state_dir,
@@ -434,7 +438,7 @@ mod tests {
       theme_dir: root.join("config/themes"),
       cache_theme_file: root.join("cache/theme.css"),
       active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
-      events_enabled_file: root.join("cache/events-enabled"),
+      events_enabled_file: root.join("state/events-enabled"),
     };
     let config = AppConfig::load(&paths).unwrap();
     assert_eq!(config.locale.language, "auto");
@@ -460,7 +464,7 @@ mod tests {
       theme_dir: root.join("config/themes"),
       cache_theme_file: root.join("cache/theme.css"),
       active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
-      events_enabled_file: root.join("cache/events-enabled"),
+      events_enabled_file: root.join("state/events-enabled"),
     };
     std::fs::write(
       &paths.config_file,
@@ -498,7 +502,7 @@ show_events = false
       theme_dir: root.join("config/themes"),
       cache_theme_file: root.join("cache/theme.css"),
       active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
-      events_enabled_file: root.join("cache/events-enabled"),
+      events_enabled_file: root.join("state/events-enabled"),
     };
     std::fs::write(&paths.config_file, "[appearance").unwrap();
     assert!(AppConfig::load(&paths).is_err());
@@ -520,7 +524,7 @@ show_events = false
       theme_dir: root.join("config/themes"),
       cache_theme_file: root.join("cache/theme.css"),
       active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
-      events_enabled_file: root.join("cache/events-enabled"),
+      events_enabled_file: root.join("state/events-enabled"),
     }
   }
 

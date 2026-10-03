@@ -2304,7 +2304,7 @@ mod tests {
       theme_dir: root.join("themes"),
       cache_theme_file: root.join("cache/theme.css"),
       active_argvus_theme_file: root.join("config/argvus/data/.active-theme"),
-      events_enabled_file: root.join("cache/events-enabled"),
+      events_enabled_file: root.join("state/events-enabled"),
       config_dir: root.join("config"),
       data_dir: root.join("data"),
       state_dir: root.join("state"),

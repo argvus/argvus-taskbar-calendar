@@ -34,7 +34,7 @@ Waybar:
 - Config: `/etc/argvus/taskbar/calendar/config.toml` (system-wide; the package ships a default)
 - Themes: `/etc/argvus/taskbar/calendar/style.css`, `/etc/argvus/taskbar/calendar/theme.css`, `/etc/argvus/taskbar/calendar/themes/`
 - Data/database: `$XDG_DATA_HOME/argvus-taskbar-calendar/` or `~/.local/share/argvus-taskbar-calendar/`
-- State: `$XDG_STATE_HOME/argvus-taskbar-calendar/` or `~/.local/state/argvus-taskbar-calendar/`
+- State: `$XDG_STATE_HOME/argvus/taskbar/calendar/` or `~/.local/state/argvus/taskbar/calendar/` (persisted events/reminders toggle in `events-enabled`)
 - Cache: `$XDG_CACHE_HOME/argvus-taskbar-calendar/` or `~/.cache/argvus-taskbar-calendar/`
 
 The active ARGVUS highlight color is read from
@@ -88,7 +88,7 @@ The gear button opens the same config file. The popup reloads the config on each
 ## Current Notes
 
 - The popup is a single-instance layer-shell surface: it stays running after hiding, so `toggle`/`show`/`hide` go through a UNIX socket IPC (`$XDG_CACHE_HOME/argvus-taskbar-calendar/`). Argvus Waybar supplies `{x_root}`/`{y_root}` from the original button event relative to its surface; the launcher adds the stable layer origin and forwards immutable desktop coordinates through IPC. The popup opens at that fixed X coordinate and 12 pixels below the click. It closes when you click anywhere outside it, click the date again, press Escape, or when it loses focus.
-- The experimental events section starts disabled, is controlled by the in-window toggle and is persisted in `$XDG_CACHE_HOME/argvus-taskbar-calendar/events-enabled`; `show_events` remains only as a legacy/config fallback.
+- The experimental events section starts disabled, is controlled by the in-window toggle and is persisted in `$XDG_STATE_HOME/argvus/taskbar/calendar/events-enabled` (default `~/.local/state/argvus/taskbar/calendar/events-enabled`); `show_events` remains only as a legacy/config fallback.
 - Local non-recurring events are automatically removed 10 minutes after they end. CalDAV, ICS and recurring events are preserved. New events cannot be created on past dates.
 - Events notify at their start time. Additional reminders can be configured in hours and minutes before the start; all-day events can additionally repeat their notification at a chosen interval during the day.
 - All-day events run from local midnight to the following midnight; start and end time controls are disabled while `ALL DAY` is active.

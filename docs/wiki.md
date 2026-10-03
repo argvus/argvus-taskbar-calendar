@@ -56,11 +56,12 @@ layered on top, so no elevated privileges are needed to persist changes.
 - `resolve_paths()` — builds `Paths` from XDG dirs (with `XDG_CONFIG_HOME` etc.
   and a user-local fallback).
 - `load_events_enabled(paths, config)` — the effective events/reminders state:
-  the cache file wins over the legacy config key; missing state defaults to off.
-- `service_events_enabled(paths)` — reads the cached events/reminders state and
+  the state file wins over the legacy config key; missing state defaults to off.
+- `service_events_enabled(paths)` — reads the persisted events/reminders state and
   defaults to off until the user explicitly enables events.
-- `save_events_enabled(paths, enabled)` — persists the state toggle.
-- `read_events_enabled(paths)` — raw cache read.
+- `save_events_enabled(paths, enabled)` — persists the state toggle in
+  `paths.state_dir` (`~/.local/state/argvus/taskbar/calendar/events-enabled`).
+- `read_events_enabled(paths)` — raw state file read.
 - `open_config(paths, config)` — opens the config file in the configured editor.
 - `editor_terminal_command(config, path)` — builds the terminal command to run
   the editor with sudo (kitty/foot and fallbacks).
