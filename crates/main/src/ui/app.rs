@@ -1,7 +1,11 @@
 use std::collections::HashSet;
 use std::process::Command;
 use std::time::{Duration, UNIX_EPOCH};
-use std::{cell::Cell, path::Path, rc::Rc};
+use std::{
+  cell::{Cell, RefCell},
+  path::Path,
+  rc::Rc,
+};
 
 use chrono::{Datelike, Days, Local, NaiveDate};
 use gtk::glib::clone;
@@ -44,6 +48,12 @@ struct PopupState {
   bounds: Cell<Option<PopupBounds>>,
   dismiss_armed: Cell<bool>,
   presentation_id: Cell<u64>,
+  // Tracks whether the window has actually gained keyboard focus since the
+  // current presentation. Guards against a spurious `has-focus-notify`
+  // firing before the compositor ever granted focus (e.g. right after the
+  // keyboard mode switches from Exclusive to OnDemand), which would
+  // otherwise be mistaken for the user clicking outside the popup.
+  focused_once: Cell<bool>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -178,6 +188,7 @@ pub struct AppModel {
   i18n: I18n,
   popup_state: Rc<PopupState>,
   _theme_watcher: Rc<Cell<ThemeFingerprint>>,
+  css_providers: Rc<RefCell<Vec<gtk::CssProvider>>>,
 }
 
 pub struct AppWidgets {
@@ -224,7 +235,8 @@ impl SimpleComponent for AppModel {
     sender: ComponentSender<Self>,
   ) -> ComponentParts<Self> {
     apply_layer_shell(&window);
-    load_css(&init.paths);
+    let css_providers = Rc::new(RefCell::new(Vec::new()));
+    load_css(&init.paths, &css_providers);
 
     let selected = today();
     let month = first_of_month(selected);
@@ -253,6 +265,7 @@ impl SimpleComponent for AppModel {
       i18n,
       popup_state: popup_state.clone(),
       _theme_watcher: theme_watcher.clone(),
+      css_providers,
     };
 
     let watch_paths = model.paths.clone();
@@ -658,9 +671,11 @@ impl SimpleComponent for AppModel {
       #[strong]
       popup_state,
       move |window| {
-        if !window.has_focus()
-          && window.is_visible()
+        if window.has_focus() {
+          popup_state.focused_once.set(true);
+        } else if window.is_visible()
           && popup_state.dismiss_armed.get()
+          && popup_state.focused_once.get()
           && pointer_is_outside_popup(popup_state.bounds.get())
         {
           sender.input(AppMsg::ClickOutside);
@@ -1355,7 +1370,7 @@ impl SimpleComponent for AppModel {
         } else {
           self.fixed_position = fixed_position;
           cancel_editor(&mut self.view);
-          load_css(&self.paths);
+          load_css(&self.paths, &self.css_providers);
           present_popup(
             &self.window,
             &self.popup,
@@ -1369,7 +1384,7 @@ impl SimpleComponent for AppModel {
         if !self.window.is_visible() {
           cancel_editor(&mut self.view);
         }
-        load_css(&self.paths);
+        load_css(&self.paths, &self.css_providers);
         present_popup(
           &self.window,
           &self.popup,
@@ -1384,7 +1399,7 @@ impl SimpleComponent for AppModel {
         hide_popup(&mut self.view, &self.window, &self.popup_state);
       }
       AppMsg::ReloadTheme => {
-        load_css(&self.paths);
+        load_css(&self.paths, &self.css_providers);
       }
     }
     if should_reload {
@@ -1402,7 +1417,7 @@ impl SimpleComponent for AppModel {
 impl AppModel {
   fn reapply_runtime(&mut self) {
     self.i18n = I18n::new(Language::resolve(&self.settings.locale.language));
-    load_css(&self.paths);
+    load_css(&self.paths, &self.css_providers);
     apply_layer_shell(&self.window);
     if self.window.is_visible() {
       present_popup(
@@ -1634,6 +1649,7 @@ fn hide_popup(view: &mut ViewState, window: &gtk::Window, popup_state: &PopupSta
   popup_state.bounds.set(None);
   cancel_editor(view);
   window.set_visible(false);
+  relm4::main_application().quit();
 }
 
 fn update_draft<F>(view: &mut ViewState, update: F)
@@ -1692,6 +1708,7 @@ fn present_popup(
   let presentation_id = popup_state.presentation_id.get().wrapping_add(1);
   popup_state.presentation_id.set(presentation_id);
   popup_state.dismiss_armed.set(false);
+  popup_state.focused_once.set(false);
   set_monitor_at_pointer(window, fixed_position);
   popup_state
     .bounds
@@ -2014,8 +2031,13 @@ fn current_monitor_geometry(pointer_x: i32, pointer_y: i32) -> Option<(i32, i32,
   })
 }
 
-fn load_css(paths: &Paths) {
+fn load_css(paths: &Paths, providers: &Rc<RefCell<Vec<gtk::CssProvider>>>) {
   if let Some(display) = gtk::gdk::Display::default() {
+    for old in providers.borrow_mut().drain(..) {
+      gtk::style_context_remove_provider_for_display(&display, &old);
+    }
+
+    let mut new_providers = Vec::new();
     for (priority, stylesheet) in stylesheet_paths(paths).into_iter().enumerate() {
       if stylesheet.exists() {
         let provider = gtk::CssProvider::new();
@@ -2025,6 +2047,7 @@ fn load_css(paths: &Paths) {
           &provider,
           gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + priority as u32,
         );
+        new_providers.push(provider);
       }
     }
 
@@ -2035,6 +2058,9 @@ fn load_css(paths: &Paths) {
       &provider,
       gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + 10,
     );
+    new_providers.push(provider);
+
+    *providers.borrow_mut() = new_providers;
   }
 }
 
