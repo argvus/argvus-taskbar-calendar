@@ -1,8 +1,8 @@
 # Maintainer: William C. Canin
 pkgname=argvus-taskbar-calendar
-pkgver=0.2.0
+pkgver=0.1.0
 pkgrel=1
-pkgdesc="Calendar popup for Waybar, written in Rust for the Argvus desktop"
+pkgdesc="Calendar popup for Waybar, written in Rust for the ARGVUS desktop"
 arch=('x86_64')
 url="https://github.com/argvus/argvus-taskbar-calendar"
 license=('GPL-3.0-only')
