@@ -7,7 +7,7 @@
 
 set -eu
 
-BINDIR=/usr/bin
+BINDIR=/usr/lib/argvus/commands
 LIBEXECDIR=/usr/lib/argvus-taskbar-calendar
 ETCDIR=/etc/argvus/taskbar/calendar
 UNITDIR=/usr/lib/systemd/user

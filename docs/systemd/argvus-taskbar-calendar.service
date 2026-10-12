@@ -4,7 +4,7 @@ After=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=argvus-taskbar-calendar service
+ExecStart=/usr/lib/argvus/commands/argvus-taskbar-calendar service
 Restart=on-failure
 
 [Install]

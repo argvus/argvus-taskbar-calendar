@@ -103,7 +103,7 @@ package() {
   ETCDIR="etc/argvus/taskbar/calendar"
 
   install -Dm755 "$(_cargo_target_dir)/release/${pkgname}" \
-    "${pkgdir}/usr/bin/${pkgname}"
+    "${pkgdir}/usr/lib/argvus/commands/${pkgname}"
 
   install -Dm755 resources/argvus-taskbar-calendar-waybar \
     "${pkgdir}/usr/lib/${pkgname}/waybar-launcher"

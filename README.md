@@ -9,18 +9,18 @@ Arch packaging is owned by this repository through `packaging/arch/{ci,local}/PK
 ## Commands
 
 ```bash
-argvus-taskbar-calendar
-argvus-taskbar-calendar toggle
-argvus-taskbar-calendar show
-argvus-taskbar-calendar hide
-argvus-taskbar-calendar config
-argvus-taskbar-calendar config-path
-argvus-taskbar-calendar reload
-argvus-taskbar-calendar import file.ics
-argvus-taskbar-calendar export --output calendar.ics
-argvus-taskbar-calendar sync
-argvus-taskbar-calendar status
-argvus-taskbar-calendar service
+argvus taskbar-calendar
+argvus taskbar-calendar toggle
+argvus taskbar-calendar show
+argvus taskbar-calendar hide
+argvus taskbar-calendar config
+argvus taskbar-calendar config-path
+argvus taskbar-calendar reload
+argvus taskbar-calendar import file.ics
+argvus taskbar-calendar export --output calendar.ics
+argvus taskbar-calendar sync
+argvus taskbar-calendar status
+argvus taskbar-calendar service
 ```
 
 Waybar:
@@ -46,7 +46,7 @@ and is applied at runtime without replacing the selected theme.
 All argvus-taskbar-calendar configuration lives in `/etc/argvus/taskbar/calendar/`. The application uses built-in defaults when `config.toml` is missing. Open the file for editing with:
 
 ```bash
-argvus-taskbar-calendar config
+argvus taskbar-calendar config
 ```
 
 This opens the file in a terminal with `sudo` (terminal from `$TERMINAL` or the `[terminal]` setting, editor from `$VISUAL`/`$EDITOR` or the `[editor]` setting, default `nano`).
@@ -54,7 +54,7 @@ This opens the file in a terminal with `sudo` (terminal from `$TERMINAL` or the 
 Print the path with:
 
 ```bash
-argvus-taskbar-calendar config-path
+argvus taskbar-calendar config-path
 ```
 
 Example:
@@ -93,7 +93,7 @@ The gear button opens the same config file. The popup reloads the config on each
 - Events notify at their start time. Additional reminders can be configured in hours and minutes before the start; all-day events can additionally repeat their notification at a chosen interval during the day.
 - All-day events run from local midnight to the following midnight; start and end time controls are disabled while `ALL DAY` is active.
 - CalDAV support is implemented as a maintained internal HTTP/XML client foundation. Account management and full DB reconciliation are the next integration step.
-- Reminders are reliable when `argvus-taskbar-calendar service` is running, or when installed as the provided user systemd service.
+- Reminders are reliable when `argvus taskbar-calendar service` is running, or when installed as the provided user systemd service.
 - Provider-specific account setup, such as Google Calendar and assisted Nextcloud setup, is planned for `0.2`.
 - The `auto` language follows the operating system locale: Portuguese when the system is set to `pt-*`, English otherwise. An explicit `en-US` or `pt-BR` in the settings always wins.
 - Styling is external: `/etc/argvus/taskbar/calendar/style.css` provides structure, `/etc/argvus/taskbar/calendar/theme.css` provides the packaged default, `/etc/argvus/taskbar/calendar/themes/` contains ARGVUS themes, and `$XDG_CACHE_HOME/argvus-taskbar-calendar/theme.css` is the user-level active theme written by the ARGVUS theme switcher.

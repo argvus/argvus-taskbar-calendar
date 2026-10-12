@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 #
 # Installs argvus-taskbar-calendar system-wide, mirroring the Arch PKGBUILD:
-#   - /usr/bin/argvus-taskbar-calendar
+#   - /usr/lib/argvus/commands/argvus-taskbar-calendar
 #   - /usr/lib/argvus-taskbar-calendar/waybar-launcher
 #   - /etc/argvus/taskbar/calendar/{config.toml, style.css, theme.css, themes/*.css}
 #   - /usr/lib/systemd/user/argvus-taskbar-calendar.service
@@ -14,7 +14,7 @@
 
 set -eu
 
-BINDIR=/usr/bin
+BINDIR=/usr/lib/argvus/commands
 LIBEXECDIR=/usr/lib/argvus-taskbar-calendar
 ETCDIR=/etc/argvus/taskbar/calendar
 THEMEDIR="$ETCDIR/themes"
