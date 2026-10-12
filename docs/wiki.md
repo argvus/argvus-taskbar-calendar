@@ -32,7 +32,7 @@ Subcommands: `Toggle`, `Show`, `Hide`, `Config`, `ConfigPath`, `Reload`,
 
 `AppConfig` (alias `Settings`) is a `serde` struct with `appearance`, `locale`,
 `calendar`, `editor` and `terminal` sections. The system file under
-`/etc/argvus-calendar/config.toml` acts as the default base and the user file is
+`/etc/argvus/taskbar/calendar/config.toml` acts as the default base and the user file is
 layered on top, so no elevated privileges are needed to persist changes.
 
 - `Settings::load(paths)` — loads the system config, merges the user config over
