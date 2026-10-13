@@ -186,7 +186,7 @@ SQLite persistence (rusqlite). `Database::open(path)` runs migrations on open.
   `local_name(name)` — XML parsing helpers (quick-xml).
 - `discovery.rs::discover(client)` — convenience wrapper around collection
   discovery.
-- `credentials.rs::store_password(...)` / `load_password(lookup)` — keyring-backed
+- `credentials.rs::store_password(...)` / `load_password(lookup)` — keyring-backed; needs a Secret Service provider on the session bus (see `argvus-session` docs)
   credential helpers.
 - `sync.rs::CalDavSyncService::new(client)` and
   `initial_sync(collection_url)` — first-pass one-way pull producing a

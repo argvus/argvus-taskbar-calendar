@@ -17,6 +17,9 @@ makedepends=(
   'cargo'
   'pkgconf'
 )
+optdepends=(
+  'gnome-keyring: stores CalDAV passwords in the Secret Service (provided by argvus-session)'
+)
 backup=(
   'etc/argvus/taskbar/calendar/config.toml'
   'etc/argvus/taskbar/calendar/style.css'
